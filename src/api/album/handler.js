@@ -3,7 +3,7 @@ class AlbumHandler {
     this._service = service;
     this._validator = validator;
 
-    this.postAlbumHandler = this.postAlbumhandler.bind(this);
+    this.postAlbumhandler = this.postAlbumhandler.bind(this);
     this.getAlbumById = this.getAlbumById.bind(this);
     this.putAlbumById = this.putAlbumById.bind(this);
     this.deleteAlbumById = this.deleteAlbumById.bind(this);
@@ -35,7 +35,7 @@ class AlbumHandler {
     return response;
   }
 
-  async putAlbumById(request, h) {
+  async putAlbumById(request) {
     this._validator.validateAlbumPayload(request.payload);
     const { id } = request.params;
     await this._service.editAlbumById(id, request.payload);
@@ -45,7 +45,7 @@ class AlbumHandler {
     };
   }
 
-  async deleteAlbumById(request, h) {
+  async deleteAlbumById(request) {
     const { id } = request.params;
     await this._service.deleteAlbumById(id);
     return {

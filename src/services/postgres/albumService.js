@@ -5,7 +5,7 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 
 class musicService {
   constructor() {
-    this.pool = Pool;
+    this.pool = new Pool();
   }
 
   async addAlbum({ name, year }) {
@@ -51,7 +51,7 @@ class musicService {
       text: 'DELETE FROM albums WHERE id = $1 RETURNING id',
       values: [id],
     };
-    const result = this.pool.query(query);
+    const result = await this.pool.query(query);
     if (!result.rows.length) {
       throw new NotFoundError('Album not found, unable to delete');
     }
