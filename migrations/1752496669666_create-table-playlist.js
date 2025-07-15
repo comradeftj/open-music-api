@@ -8,20 +8,21 @@
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-  pgm.createTable('albums', {
+  pgm.createTable('playlist', {
     id: {
-      type: 'VARCHAR(22)',
+      type: 'VARCHAR(25)',
       primaryKey: true,
     },
     name: {
       type: 'TEXT',
       notNull: true,
     },
-    year: {
-      type: 'INT',
+    owner: {
+      type: 'VARCHAR(21)',
       notNull: true,
-    }
+    },
   });
+  pgm.addConstraint('playlist', 'fk_playlist.owner_users.id', 'FOREIGN KEY(owner) REFERENCES users(id) ON DELETE CASCADE');
 };
 
 /**
@@ -30,5 +31,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropTable('album');
+  pgm.dropTable('playlist');
 };

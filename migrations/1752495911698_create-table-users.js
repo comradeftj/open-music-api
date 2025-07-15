@@ -8,20 +8,26 @@
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-  pgm.createTable('albums', {
+  pgm.createTable('users', {
     id: {
-      type: 'VARCHAR(22)',
+      type: 'VARCHAR(21)',
       primaryKey: true,
     },
-    name: {
+    username: {
+      type: 'VARCHAR(50)',
+      unique: true,
+      notNull: true,
+    },
+    password: {
       type: 'TEXT',
       notNull: true,
     },
-    year: {
-      type: 'INT',
+    fullname: {
+      type: 'TEXT',
       notNull: true,
-    }
+    },
   });
+  pgm.addConstraint('users', 'unique_username', 'UNIQUE(username)');
 };
 
 /**
@@ -30,5 +36,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropTable('album');
+  pgm.dropTable('users');
 };
