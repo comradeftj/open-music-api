@@ -34,6 +34,11 @@ const collaboration = require('./api/collaborations');
 const CollaborationService = require('./services/postgres/collaborationService');
 const collabValidator = require('./validators/collaboration');
 
+//exports
+const _exports = require('./api/exports');
+const ProducerService = require('./services/rabbitmq/producerService');
+const exportValidator = require('./validators/exports');
+
 const init = async () => {
   const authenticationsService = new AuthenticationsService();
   const collaborationsService = new CollaborationService();
@@ -119,6 +124,14 @@ const init = async () => {
         usersService,
         playlistService,
         validator: collabValidator,
+      },
+    },
+    {
+      plugin: _exports,
+      options: {
+        playlistService: playlistService,
+        producerService: ProducerService,
+        validator: exportValidator,
       },
     },
   ]);
