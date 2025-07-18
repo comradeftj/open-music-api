@@ -4,8 +4,9 @@ const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 class musicService {
-  constructor() {
+  constructor(uploadService) {
     this.pool = new Pool();
+    this._uploadService = uploadService;
   }
 
   async addAlbum({ name, year }) {
@@ -32,7 +33,7 @@ class musicService {
 
   async getAlbumById(id) {
     const query = {
-      text: 'SELECT * FROM albums WHERE id = $1',
+      text: 'SELECT id, name, year, cover AS "coverUrl" FROM albums WHERE id = $1',
       values: [id],
     };
     const result = await this.pool.query(query);
@@ -50,6 +51,21 @@ class musicService {
     const query = {
       text: 'UPDATE albums SET name = $1, year = $2 WHERE id = $3 RETURNING id',
       values: [name, year, id],
+    };
+    const result = await this.pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Album not found, unable to edit');
+    }
+  }
+
+  async editAlbumCoverById(id, file, meta) {
+    const fileName = await this._uploadService.addCover(file, meta);
+    const path = `http://${process.env.HOST}:${process.env.PORT}/albums/${id}/covers/${fileName}`;
+
+    const query = {
+      text: 'UPDATE albums SET cover = $1 WHERE id = $2 RETURNING id',
+      values: [path, id],
     };
     const result = await this.pool.query(query);
 

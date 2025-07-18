@@ -78,9 +78,9 @@ class PlaylistService {
       text: 'DELETE FROM playlist WHERE id = $1 RETURNING id',
       values: [id],
     };
-    const result = await this._pool.query(query);
+    const { rowCount } = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!rowCount) {
       throw new NotFoundError('Playlist not found');
     }
   }

@@ -1,11 +1,14 @@
 require('dotenv').config();
+
 const Hapi = require('@hapi/hapi');
+const Inert = require('@hapi/inert');
 const Jwt = require('@hapi/jwt');
 const ClientError = require('./exceptions/ClientError');
+const path = require('path');
 
 //album
 const album = require('./api/album');
-const MusicService = require('./services/postgres/albumService');
+const AlbumService = require('./services/postgres/albumService');
 const albumValidator = require('./validators/album');
 
 //song
@@ -39,13 +42,26 @@ const _exports = require('./api/exports');
 const ProducerService = require('./services/rabbitmq/producerService');
 const exportValidator = require('./validators/exports');
 
+//uploads
+const UploadService = require('./services/uploads/uploadService');
+
+//likes
+const likes = require('./api/likes');
+const LikesService = require('./services/postgres/likesService');
+
+//cache
+const CacheService = require('./services/redis/cacheService');
+
 const init = async () => {
+  const uploadService = new UploadService(path.resolve(__dirname, 'api/album/file/covers'));
   const authenticationsService = new AuthenticationsService();
   const collaborationsService = new CollaborationService();
-  const musicService = new MusicService();
+  const albumService = new AlbumService(uploadService);
   const songService = new SongService();
   const usersService = new UsersService();
   const playlistService = new PlaylistService(songService, collaborationsService);
+  const cacheService = new CacheService();
+  const likesService = new LikesService(cacheService);
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -60,6 +76,9 @@ const init = async () => {
   await server.register([
     {
       plugin: Jwt
+    },
+    {
+      plugin: Inert,
     },
   ]);
 
@@ -83,7 +102,7 @@ const init = async () => {
     {
       plugin: album,
       options: {
-        service: musicService,
+        service: albumService,
         validator: albumValidator,
       },
     },
@@ -132,6 +151,12 @@ const init = async () => {
         playlistService: playlistService,
         producerService: ProducerService,
         validator: exportValidator,
+      },
+    },
+    {
+      plugin: likes,
+      options: {
+        service: likesService,
       },
     },
   ]);
